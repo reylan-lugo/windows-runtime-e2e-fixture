@@ -1,4 +1,5 @@
 using System.Runtime.Versioning;
+using Microsoft.Win32;
 using WindowsRuntimeE2E;
 
 namespace WindowsRuntimeE2E.Tests;
@@ -16,6 +17,7 @@ internal static class Program
         var failures = new List<string>();
         Run(failures, "native system directory is available", NativeSystemInformationReturnsAWindowsDirectory);
         Run(failures, "installation root survives a registry round trip", InstallationRootSurvivesRegistryRoundTrip);
+        Run(failures, "installation root persists to 64-bit registry view", InstallationRootPersistsTo64BitRegistryView);
 
         if (failures.Count == 0)
         {
@@ -81,6 +83,45 @@ internal static class Program
         finally
         {
             settings.DeleteTestData();
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static void InstallationRootPersistsTo64BitRegistryView()
+    {
+        var testId = Guid.NewGuid().ToString("N");
+        var expected = $@"C:\ProgramData\Persea\fixtures\{testId}";
+        var subkeyPath = $@"Software\Classes\Persea\WindowsRuntimeE2E\{testId}";
+        using var settings = new WindowsMachineSettings(subkeyPath);
+
+        try
+        {
+            settings.SaveInstallRoot(expected);
+            var actual = settings.RequireInstallRoot();
+            if (!string.Equals(expected, actual, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Expected the initialized installation root, but received '{actual}'."
+                );
+            }
+
+            using var root64 = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
+            using var key64 = root64.OpenSubKey(subkeyPath);
+            var directValue = key64?.GetValue("InstallRoot") as string;
+            if (!string.Equals(expected, directValue, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"The installation root was not written to the 64-bit registry view: received '{directValue}'."
+                );
+            }
+        }
+        finally
+        {
+            settings.DeleteTestData();
+            using var root32 = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32);
+            root32.DeleteSubKeyTree(subkeyPath, throwOnMissingSubKey: false);
+            using var root64 = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
+            root64.DeleteSubKeyTree(subkeyPath, throwOnMissingSubKey: false);
         }
     }
 }

@@ -5,9 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IntermediateOutputPath>$(TEMP)\obj\WindowsRuntimeE2E.Tests\</IntermediateOutputPath>
+    <OutputPath>$(TEMP)\bin\WindowsRuntimeE2E.Tests\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/WindowsRuntimeE2E/WindowsRuntimeE2E.csproj" />
+    <ProjectReference Include="../../src/WindowsRuntimeE2E/WindowsRuntimeE2E.csproj" AdditionalProperties="IntermediateOutputPath=$(TEMP)\obj\WindowsRuntimeE2E\;OutputPath=$(TEMP)\bin\WindowsRuntimeE2E\" />
   </ItemGroup>
 </Project>
