@@ -1,5 +1,9 @@
 **/bin/
 **/obj/
+**/bin_build/
+**/obj_build/
+clean.bat
+clean_scratch.py
 .vs/
 .vscode/
 *.user
