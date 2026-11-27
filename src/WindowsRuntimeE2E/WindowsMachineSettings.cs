@@ -21,7 +21,7 @@ public sealed class WindowsMachineSettings : IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentException.ThrowIfNullOrWhiteSpace(installRoot);
 
-        using var root = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32);
+        using var root = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
         using var settings = root.CreateSubKey(_subkeyPath, writable: true)
             ?? throw new InvalidOperationException("The Windows settings key could not be created.");
         settings.SetValue(InstallRootValue, installRoot, RegistryValueKind.String);
