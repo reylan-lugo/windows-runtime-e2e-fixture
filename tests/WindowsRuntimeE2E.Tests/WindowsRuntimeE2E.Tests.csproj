@@ -10,4 +10,16 @@
   <ItemGroup>
     <ProjectReference Include="../../src/WindowsRuntimeE2E/WindowsRuntimeE2E.csproj" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <IntermediateOutputPath>$(TEMP)\obj\$(MSBuildProjectName)\</IntermediateOutputPath>
+    <OutputPath>$(TEMP)\bin\$(MSBuildProjectName)\</OutputPath>
+    <ProjectAssetsFile>$(MSBuildProjectDirectory)\obj\project.assets.json</ProjectAssetsFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Update="../../src/WindowsRuntimeE2E/WindowsRuntimeE2E.csproj">
+      <Properties>IntermediateOutputPath=$(TEMP)\obj\WindowsRuntimeE2E\;OutputPath=$(TEMP)\bin\WindowsRuntimeE2E\;ProjectAssetsFile=$(MSBuildThisFileDirectory)../../src/WindowsRuntimeE2E/obj/project.assets.json</Properties>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
