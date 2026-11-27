@@ -16,6 +16,7 @@ internal static class Program
         var failures = new List<string>();
         Run(failures, "native system directory is available", NativeSystemInformationReturnsAWindowsDirectory);
         Run(failures, "installation root survives a registry round trip", InstallationRootSurvivesRegistryRoundTrip);
+        Run(failures, "installation root survives redirected registry round trip", InstallationRootSurvivesRedirectedRegistryRoundTrip);
 
         if (failures.Count == 0)
         {
@@ -65,6 +66,32 @@ internal static class Program
         var expected = $@"C:\ProgramData\Persea\fixtures\{testId}";
         using var settings = new WindowsMachineSettings(
             $@"Software\Persea\WindowsRuntimeE2E\{testId}"
+        );
+
+        try
+        {
+            settings.SaveInstallRoot(expected);
+            var actual = settings.RequireInstallRoot();
+            if (!string.Equals(expected, actual, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Expected the initialized installation root, but received '{actual}'."
+                );
+            }
+        }
+        finally
+        {
+            settings.DeleteTestData();
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static void InstallationRootSurvivesRedirectedRegistryRoundTrip()
+    {
+        var testId = Guid.NewGuid().ToString("N");
+        var expected = $@"C:\ProgramData\Persea\fixtures\{testId}";
+        using var settings = new WindowsMachineSettings(
+            $@"Software\Classes\Persea\WindowsRuntimeE2E\{testId}"
         );
 
         try
